@@ -38,20 +38,23 @@ phones = set(re.findall(r"\+(?:977|66)[0-9-]{8,}", t))
 print(f"Приватность: финансовых слов нет; телефонов +977/+66: {len(phones)}")
 PY
 
-# Исходник — фрагмент без <!doctype>/<head>: добавляем каркас и meta robots.
+# Исходник — фрагмент без <!doctype>/<head>: добавляем каркас, meta robots и правило [hidden].
 # Если в исходнике появится свой <head>, вставляем meta robots в него.
 python3 -I - "$TMP/raw.html" index.html <<'PY'
 import re, sys
 src = open(sys.argv[1], encoding="utf-8").read()
 robots = '<meta name="robots" content="noindex, nofollow">'
+# В среде Claude, где делали страницу, [hidden] скрывается всегда; без этого правила
+# классы с display:flex перебивают hidden и запасная схема карты ложится поверх 3D-карты.
+fix = '<style>[hidden]{display:none!important}</style>'
 if re.search(r'name=["\']robots["\']', src, re.I):
-    out = src
+    out = src.replace("</title>", "</title>\n" + fix, 1)
 elif re.search(r"<head(\s[^>]*)?>", src, re.I):
-    out = re.sub(r"(<head(?:\s[^>]*)?>)", r"\1\n" + robots, src, count=1, flags=re.I)
+    out = re.sub(r"(<head(?:\s[^>]*)?>)", r"\1\n" + robots + "\n" + fix, src, count=1, flags=re.I)
 else:
     out = ("<!doctype html>\n<html lang=\"ru\">\n<head>\n<meta charset=\"utf-8\">\n"
            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-           + robots + "\n" + src)
+           + robots + "\n" + fix + "\n" + src)
 open(sys.argv[2], "w", encoding="utf-8").write(out)
 PY
 
