@@ -55,6 +55,17 @@ else:
     out = ("<!doctype html>\n<html lang=\"ru\">\n<head>\n<meta charset=\"utf-8\">\n"
            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
            + robots + "\n" + fix + "\n" + src)
+# Номер Аруна (Покхара) прислан 21.11, в исходнике его ещё нет — подставляем,
+# пока там стоит «номер скоро добавим».
+arun_old = '<b>Арун (Arun)</b><span class="pw">Покхара · отсюда мы стартуем</span><span class="pr"><span class="soon">номер скоро добавим</span></span>'
+arun_new = ('<b>Арун (Arun)</b><span class="pw">Покхара · отсюда мы стартуем</span><span class="pr">'
+            '<a class="tel" href="tel:+9779856069663">+977 985-6069663</a>'
+            '<a class="wa" href="https://wa.me/9779856069663" target="_blank" rel="noopener">WhatsApp</a></span>')
+if arun_old in out:
+    out = out.replace(arun_old, arun_new, 1)
+    print("Номер Аруна подставлен")
+elif "9856069663" not in out:
+    print("ВНИМАНИЕ: карточка Аруна в исходнике изменилась, номер не подставлен — проверьте вручную")
 open(sys.argv[2], "w", encoding="utf-8").write(out)
 PY
 
